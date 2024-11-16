@@ -1,10 +1,9 @@
 import streamlit as st
 
-# Función para formatear números
 def format_number(number):
     return "{:,.0f}".format(number).replace(",", ".")
 
-# Datos para cada línea de crédito
+# Datos base
 LINEAS_DE_CREDITO = {
     "LoansiFlex": {
         "descripcion": "Crédito de libre inversión para empleados, independientes, personas naturales y pensionados.",
@@ -40,140 +39,145 @@ def calcular_seguro_vida(plazo, seguro_vida_base):
     años = plazo // 12
     return seguro_vida_base * años if años >= 1 else 0
 
-# Estilos
 st.markdown("""
 <style>
-.main {
-    font-family: 'Inter', sans-serif;
-    background-color: #1E1E1E;
-}
+    /* Tema oscuro */
+    .stApp {
+        background-color: #1E1E1E;
+    }
 
-.stApp {
-    background-color: #1E1E1E;
-}
+    /* Selector de crédito */
+    .stSelectbox > div > div {
+        background-color: #27282B !important;
+        color: white !important;
+        border: none !important;
+    }
 
-.section-title {
-    color: #FFFFFF;
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 2rem 0 1rem;
-}
+    /* Slider */
+    .slider-container {
+        position: relative;
+        padding: 2rem 0;
+    }
 
-.monto-display {
-    color: #3B82F6;
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0.5rem 0 1rem 0;
-    text-align: left;
-}
+    .stSlider > div {
+        padding-top: 1rem !important;
+        padding-bottom: 3rem !important;
+    }
 
-.stSlider {
-    margin: 2rem 0 !important;
-}
+    .stSlider div[data-baseweb="slider"] > div {
+        background: #4B5563 !important;
+        height: 0.4rem !important;
+    }
 
-/* Ocultar TODOS los elementos de texto del slider */
-.stSlider div[data-baseweb="slider"] > div {
-    background: #4B5563 !important;
-    height: 0.5rem !important;
-    border-radius: 0.25rem !important;
-}
+    .stSlider div[role="slider"] {
+        background: #3B82F6 !important;
+        border: 2px solid white !important;
+        width: 1.8rem !important;
+        height: 1.8rem !important;
+        border-radius: 50% !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+        top: -0.7rem !important;
+    }
 
-/* Estilo del botón deslizante */
-.stSlider div[role="slider"] {
-    background: #3B82F6 !important;
-    border: 2px solid #FFFFFF !important;
-    width: 2rem !important;
-    height: 2rem !important;
-    border-radius: 50% !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-}
+    /* Texto del monto */
+    .monto-grande {
+        color: #3B82F6;
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 1.5rem 0;
+    }
 
-/* Ocultar TODOS los números y textos del slider */
-.stSlider div[data-baseweb="slider"] div[role="slider"] div,
-.stSlider div[data-baseweb="slider"] div[role="slider"] span,
-.stSlider div[data-baseweb="tooltip"],
-.stMarkdown {
-    display: none !important;
-}
+    /* Valores min/max */
+    .valores-minmax {
+        display: flex;
+        justify-content: space-between;
+        color: white;
+        font-size: 0.9rem;
+        margin-top: -2rem;
+    }
 
-div[role="radiogroup"] {
-    display: flex !important;
-    justify-content: flex-start !important;
-    gap: 1rem !important;
-    background: transparent !important;
-    border: none !important;
-}
+    /* Botones de plazo */
+    .stRadio > label {
+        background: #27282B !important;
+        border: none !important;
+        color: white !important;
+        padding: 1rem 2rem !important;
+        border-radius: 0.5rem !important;
+        margin: 0.2rem !important;
+        min-width: 120px !important;
+        text-align: center !important;
+    }
 
-.stRadio > label {
-    background: #27272A !important;
-    padding: 1rem 2rem !important;
-    border-radius: 0.5rem !important;
-    text-align: center !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    border: none !important;
-    box-shadow: none !important;
-}
+    .stRadio > label[data-checked="true"] {
+        background: #3B82F6 !important;
+    }
 
-.stRadio > label[data-checked="true"] {
-    background: #3B82F6 !important;
-    color: white !important;
-}
+    /* Texto de cuotas */
+    .resultado-container {
+        background: rgba(255,255,255,0.05);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        text-align: center;
+    }
 
-.stRadio input {
-    display: none !important;
-}
+    .texto-cuota {
+        color: #B0B0B0;
+        margin-bottom: 0.5rem;
+    }
 
-.result-box {
-    background: #27272A;
-    border-radius: 1rem;
-    padding: 2rem;
-    margin: 2rem 0;
-    text-align: center;
-}
+    .valor-cuota {
+        color: #3B82F6;
+        font-size: 2rem;
+        font-weight: bold;
+    }
 
-.result-text {
-    color: #D1D5DB;
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-}
+    .detalle-container {
+        background: #27282B;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
 
-.result-amount {
-    color: #3B82F6;
-    font-size: 2.5rem;
-    font-weight: 700;
-}
+    /* Ocultar elementos del slider */
+    .stSlider div[data-baseweb="slider"] div[role="slider"] div,
+    .stSlider div[data-baseweb="tooltip"] {
+        display: none !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 style='color: white;'>Simulador de Crédito Loansi</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='color: white; font-size: 2rem; margin-bottom: 2rem;'>Simulador de Crédito Loansi</h1>", unsafe_allow_html=True)
 
 # Selección de línea de crédito
 tipo_credito = st.selectbox("", options=LINEAS_DE_CREDITO.keys(), key="select_credito")
 detalles = LINEAS_DE_CREDITO[tipo_credito]
 
-# Sección de monto
-col1, col2, col3 = st.columns([1,10,1])
-with col2:
-    st.markdown("<p class='section-title'>¿Cuánto necesitas?</p>", unsafe_allow_html=True)
-    
-    # Mostrar el valor antes del slider
-    st.markdown(f"<div class='monto-display'>$ {format_number(monto if 'monto' in locals() else detalles['monto_min'])}</div>", unsafe_allow_html=True)
-    
-    # Slider sin etiquetas ni números
-    monto = st.slider(
-        "monto",
-        min_value=detalles["monto_min"],
-        max_value=detalles["monto_max"],
-        step=50000,
-        key="monto_slider",
-        label_visibility="collapsed"
-    )
+# Monto
+st.markdown("<p style='color: white; font-size: 1.2rem; margin: 2rem 0 1rem;'>¿Cuánto necesitas?</p>", unsafe_allow_html=True)
 
-# Sección de plazo
-st.markdown("<div style='margin-top: 2rem;'></div>", unsafe_allow_html=True)
-st.markdown("<p class='section-title'>Selecciona el plazo</p>", unsafe_allow_html=True)
+# Mostrar valores min/max
+st.markdown(f"""
+<div class="valores-minmax">
+    <span>$ {format_number(detalles['monto_min'])}</span>
+    <span>$ {format_number(detalles['monto_max'])}</span>
+</div>
+""", unsafe_allow_html=True)
 
+# Slider y monto
+monto = st.slider(
+    "",
+    min_value=detalles["monto_min"],
+    max_value=detalles["monto_max"],
+    step=50000,
+    key="monto_slider",
+    label_visibility="collapsed"
+)
+
+st.markdown(f"<div class='monto-grande'>$ {format_number(monto)}</div>", unsafe_allow_html=True)
+
+# Plazo
+st.markdown("<p style='color: white; font-size: 1.2rem; margin: 2rem 0 1rem;'>Selecciona el plazo</p>", unsafe_allow_html=True)
 plazo = st.radio(
     "",
     options=detalles["plazos"],
@@ -189,7 +193,6 @@ aval = monto * detalles["aval_porcentaje"]
 seguro_vida = calcular_seguro_vida(plazo, detalles.get("seguro_vida_base", 0)) if tipo_credito == "LoansiFlex" else 0
 total_financiar = monto + aval + total_costos_asociados + seguro_vida
 
-# Cálculo de cuota
 if tipo_credito == "LoansiFlex":
     cuota = (total_financiar * (detalles["tasa_mensual"] / 100)) / (1 - (1 + detalles["tasa_mensual"] / 100) ** -plazo)
 else:
@@ -199,13 +202,13 @@ else:
 
 # Mostrar resultado
 st.markdown(f"""
-<div class="result-box">
-    <p class="result-text">Pagarás {plazo} {frecuencia_pago.lower()} por un valor aproximado de:</p>
-    <div class="result-amount">$ {format_number(cuota)} {frecuencia_pago}</div>
+<div class="resultado-container">
+    <div class="texto-cuota">Pagarás {plazo} {frecuencia_pago.lower()} por un valor aproximado de:</div>
+    <div class="valor-cuota">$ {format_number(cuota)} {frecuencia_pago}</div>
 </div>
 """, unsafe_allow_html=True)
 
-# Ver detalles del crédito
+# Detalles del crédito
 with st.expander("Ver Detalles del Crédito"):
     total_interes = cuota * plazo - total_financiar
     total_pagar = cuota * plazo
@@ -217,7 +220,7 @@ with st.expander("Ver Detalles del Crédito"):
         ("Tasa de Interés Mensual", f"{detalles['tasa_mensual']}%"),
         ("Tasa Efectiva Anual (E.A.)", f"{detalles['tasa_anual_efectiva']}%"),
         ("Costo del Aval", f"$ {format_number(aval)} COP"),
-        ("Costos Asociados", f"$ {format_number(total_costos_asociados)} COP"),
+        ("Costos Asociados", f"$ {format_number(total_costos_asociados)} COP")
     ]
     
     if tipo_credito == "LoansiFlex":
@@ -235,15 +238,3 @@ with st.expander("Ver Detalles del Crédito"):
             <span style="color: white; font-weight: 500;">{valor}</span>
         </div>
         """, unsafe_allow_html=True)
-
-# Mensaje legal
-st.markdown("""
-<div style='font-size: 0.8rem; color: #9CA3AF; margin-top: 2rem; padding: 1rem; background-color: rgba(255,255,255,0.05); border-radius: 0.5rem; line-height: 1.5;'>
-    Loansi.co ofrece este Simulador conforme a la ley para propósitos informativos, sin que constituya una oferta o 
-    compromiso de contratación. El simulador es orientativo y busca brindarte estimaciones generales. Los resultados 
-    de la simulación no representan una garantía o asesoría en áreas comerciales, contables, fiscales o legales. 
-    Los términos de la simulación se basan en las condiciones de mercado actuales. La tasa de interés aplicable será 
-    la vigente en LOANSI SAS al momento de usar el simulador. Los demás elementos del crédito pueden cambiar y dependen 
-    de factores externos, tu nivel de riesgo y capacidad de pago.
-</div>
-""", unsafe_allow_html=True)

@@ -1,8 +1,36 @@
-# Función para formatear números (al inicio del código)
+import streamlit as st
+
+# Configuración inicial
+st.set_page_config(page_title="Simulador de Crédito Loansi", layout="centered")
+
+# Función para formatear números
 def format_number(number):
     return "{:,.0f}".format(number).replace(",", ".")
 
-# Estilos actualizados
+# Datos de las líneas de crédito
+LINEAS_DE_CREDITO = {
+    "LoansiFlex": {
+        "descripcion": "Crédito de libre inversión para empleados, independientes, personas naturales y pensionados.",
+        "monto_min": 1000000,
+        "monto_max": 20000000,
+        "plazos": [12, 24, 36, 48, 60],
+        "tasa_mensual": 1.9715,
+        "tasa_anual_efectiva": 26.4,
+        "aval_porcentaje": 0.10,
+        "seguro_vida_base": 150000
+    },
+    "Microflex": {
+        "descripcion": "Crédito rotativo para personas en sectores informales, orientado a cubrir necesidades de liquidez rápida con pagos semanales.",
+        "monto_min": 50000,
+        "monto_max": 500000,
+        "plazos": [4, 6, 8],
+        "tasa_mensual": 2.0718,
+        "tasa_anual_efectiva": 27.9,
+        "aval_porcentaje": 0.12
+    }
+}
+
+# Estilos CSS
 st.markdown("""
 <style>
     .stApp {
@@ -16,56 +44,51 @@ st.markdown("""
         margin: 2rem 0;
     }
 
-    .selector-label {
-        color: white;
-        font-size: 1rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .stSelectbox [data-baseweb="select"] {
+    /* Selector de crédito */
+    .stSelectbox > div {
         background-color: #27282B !important;
     }
+    
+    .stSelectbox [data-baseweb="select"] div {
+        background-color: #27282B !important;
+        border: none !important;
+        color: white !important;
+    }
 
+    /* Texto cuánto necesitas */
     .monto-title {
         color: white;
         font-size: 1.3rem;
         margin: 2rem 0 1rem 0;
     }
-    
-    /* Valor seleccionado (arriba del slider) */
+
+    /* Valor grande seleccionado */
     .monto-value {
         color: #3B82F6;
         font-size: 2.8rem;
         font-weight: 700;
-        margin: 1rem 0 2rem 0;
+        margin-bottom: 2rem;
     }
 
-    /* Contenedor del slider */
+    /* Slider y valores */
     .slider-container {
         position: relative;
-        padding: 0 0.5rem;
+        padding: 0.5rem 0;
     }
 
-    /* Valores min/max debajo del slider */
-    .minmax-values {
-        display: flex;
-        justify-content: space-between;
-        color: white;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
+    /* Slider personalizado */
+    .stSlider > div {
+        padding: 1rem 0 !important;
     }
 
-    /* Ocultar elementos innecesarios del slider */
-    .stSlider [data-baseweb="slider"] div[role="slider"] div,
-    .stSlider [data-baseweb="tooltip"] {
-        display: none !important;
+    .stSlider [data-baseweb="slider"] {
+        margin-top: 1rem !important;
     }
 
-    /* Estilizar el slider */
+    /* Barra del slider */
     div[data-testid="stSlider"] > div > div > div {
-        position: relative;
+        background: #4B5563 !important;
         height: 6px !important;
-        background: linear-gradient(to right, #FF4B4B var(--progress, 50%), #4B5563 var(--progress, 50%)) !important;
         border-radius: 3px !important;
     }
 
@@ -77,36 +100,61 @@ st.markdown("""
         border: 2px solid white !important;
         border-radius: 50% !important;
         top: -7px !important;
-        cursor: pointer !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+    }
+
+    /* Ocultar elementos innecesarios */
+    .stSlider [data-baseweb="slider"] div[role="slider"] div,
+    .stSlider [data-baseweb="tooltip"],
+    .stSlider div[role="slider"] span {
+        display: none !important;
+    }
+
+    /* Valores min/max */
+    .minmax-values {
+        display: flex;
+        justify-content: space-between;
+        color: white;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Título y selector
+# Título
 st.markdown('<h1 class="main-title">Simulador de Crédito Loansi</h1>', unsafe_allow_html=True)
-st.markdown('<div class="selector-label">Selecciona la línea de crédito</div>', unsafe_allow_html=True)
-tipo_credito = st.selectbox("", options=LINEAS_DE_CREDITO.keys(), key="select_credito", label_visibility="collapsed")
+
+# Selector de línea de crédito
+st.markdown('<div style="color: white; margin-bottom: 0.5rem;">Selecciona la línea de crédito</div>', unsafe_allow_html=True)
+tipo_credito = st.selectbox("", options=LINEAS_DE_CREDITO.keys(), label_visibility="collapsed")
 detalles = LINEAS_DE_CREDITO[tipo_credito]
 
 # Sección de monto
 st.markdown('<div class="monto-title">¿Cuánto necesitas?</div>', unsafe_allow_html=True)
 
-# Valor seleccionado (antes del slider)
-monto = st.slider(
-    "",
-    min_value=detalles["monto_min"],
-    max_value=detalles["monto_max"],
-    step=50000,
-    key="monto_slider",
-    label_visibility="collapsed"
-)
+# Slider y valor seleccionado
+col1, col2 = st.columns([20,1])
+with col1:
+    monto = st.slider(
+        "",
+        min_value=detalles["monto_min"],
+        max_value=detalles["monto_max"],
+        step=50000,
+        label_visibility="collapsed"
+    )
 
-# Mostrar el valor seleccionado
-st.markdown(f"""
-<div class="monto-value">$ {format_number(monto)}</div>
-""", unsafe_allow_html=True)
+    # Mostrar valor grande debajo del título
+    st.markdown(f'<div class="monto-value">$ {format_number(monto)}</div>', unsafe_allow_html=True)
 
-# Valores min/max debajo del slider
+    # Valores min/max debajo del slider
+    st.markdown(f"""
+    <div class="minmax-values">
+        <span>{format_number(detalles["monto_min"])}</span>
+        <span>{format_number(detalles["monto_max"])}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Barra de progreso roja
 progress = ((monto - detalles["monto_min"]) / (detalles["monto_max"] - detalles["monto_min"])) * 100
 st.markdown(f"""
 <style>
@@ -114,10 +162,4 @@ st.markdown(f"""
         background: linear-gradient(to right, #FF4B4B {progress}%, #4B5563 {progress}%) !important;
     }}
 </style>
-<div class="slider-container">
-    <div class="minmax-values">
-        <span>{format_number(detalles["monto_min"])}</span>
-        <span>{format_number(detalles["monto_max"])}</span>
-    </div>
-</div>
 """, unsafe_allow_html=True)

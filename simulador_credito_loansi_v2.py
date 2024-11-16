@@ -63,14 +63,23 @@ st.markdown("""
     color: #3B82F6;
     font-size: 2.5rem;
     font-weight: 700;
-    margin: 1rem 0 2rem 0;
+    margin: 0.5rem 0 1rem 0;
+    text-align: left;
 }
 
 .stSlider {
-    margin: 3rem 0 2rem 0 !important;
+    margin: 2rem 0 !important;
 }
 
-.stSlider > div > div > div {
+/* Ocultar TODOS los elementos de texto del slider */
+.stSlider div[data-baseweb="slider"] > div {
+    background: #4B5563 !important;
+    height: 0.5rem !important;
+    border-radius: 0.25rem !important;
+}
+
+/* Estilo del botón deslizante */
+.stSlider div[role="slider"] {
     background: #3B82F6 !important;
     border: 2px solid #FFFFFF !important;
     width: 2rem !important;
@@ -79,13 +88,11 @@ st.markdown("""
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
-.stSlider > div > div {
-    background: #4B5563 !important;
-    height: 0.5rem !important;
-    border-radius: 0.25rem !important;
-}
-
-.stSlider > div > div > span {
+/* Ocultar TODOS los números y textos del slider */
+.stSlider div[data-baseweb="slider"] div[role="slider"] div,
+.stSlider div[data-baseweb="slider"] div[role="slider"] span,
+.stSlider div[data-baseweb="tooltip"],
+.stMarkdown {
     display: none !important;
 }
 
@@ -146,18 +153,22 @@ tipo_credito = st.selectbox("", options=LINEAS_DE_CREDITO.keys(), key="select_cr
 detalles = LINEAS_DE_CREDITO[tipo_credito]
 
 # Sección de monto
-st.markdown("<p class='section-title'>¿Cuánto necesitas?</p>", unsafe_allow_html=True)
-
-monto = st.slider(
-    "",
-    min_value=detalles["monto_min"],
-    max_value=detalles["monto_max"],
-    step=50000,
-    key="monto_slider",
-    label_visibility="collapsed"
-)
-
-st.markdown(f"<div class='monto-display'>$ {format_number(monto)}</div>", unsafe_allow_html=True)
+col1, col2, col3 = st.columns([1,10,1])
+with col2:
+    st.markdown("<p class='section-title'>¿Cuánto necesitas?</p>", unsafe_allow_html=True)
+    
+    # Mostrar el valor antes del slider
+    st.markdown(f"<div class='monto-display'>$ {format_number(monto if 'monto' in locals() else detalles['monto_min'])}</div>", unsafe_allow_html=True)
+    
+    # Slider sin etiquetas ni números
+    monto = st.slider(
+        "monto",
+        min_value=detalles["monto_min"],
+        max_value=detalles["monto_max"],
+        step=50000,
+        key="monto_slider",
+        label_visibility="collapsed"
+    )
 
 # Sección de plazo
 st.markdown("<div style='margin-top: 2rem;'></div>", unsafe_allow_html=True)

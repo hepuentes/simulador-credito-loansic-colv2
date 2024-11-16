@@ -45,49 +45,93 @@ def calcular_seguro_vida(plazo, seguro_vida_base):
     años = plazo // 12
     return seguro_vida_base * años if años >= 1 else 0
 
-# Estilos
+# Estilos mejorados
 st.markdown("""
 <style>
-    .main {
-        font-family: 'Inter', sans-serif;
-        color: #FFFFFF;
-        background-color: #1E1E1E;
-    }
-
-    /* Títulos */
-    .section-title {
-        color: #FFFFFF;
-        font-size: 1.5rem;
-        font-weight: 600;
-        text-align: left;
-        margin: 2rem 0 1rem;
-    }
-
-    /* Monto display */
-    .monto-display {
-        color: #3B82F6;
-        font-size: 2.2rem;
-        font-weight: 700;
-        text-align: left;
-        margin: 1rem 0;
-    }
-
     /* Slider personalizado */
+    .stSlider {
+        margin: 3rem 0 2rem 0 !important;
+    }
+    
     .stSlider > div > div > div {
         background: #3B82F6 !important;
         border: 2px solid #FFFFFF !important;
-        width: 2.5rem !important;
-        height: 2.5rem !important;
+        width: 2rem !important;
+        height: 2rem !important;
         border-radius: 50% !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-        cursor: pointer !important;
     }
 
     .stSlider > div > div {
-        background: linear-gradient(90deg, #3B82F6 var(--slider-progress), #4B5563 var(--slider-progress)) !important;
-        height: 0.75rem !important;
-        border-radius: 1rem !important;
+        background: #4B5563 !important;
+        height: 0.5rem !important;
+        border-radius: 0.25rem !important;
     }
+    
+    /* Ocultar números del slider */
+    .stSlider > div > div > span {
+        display: none !important;
+    }
+    
+    /* Valor del monto */
+    .monto-display {
+        color: #3B82F6 !important;
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        margin: 1rem 0 2rem 0 !important;
+    }
+    
+    /* Botones de plazo */
+    div[role="radiogroup"] {
+        display: flex !important;
+        justify-content: flex-start !important;
+        gap: 1rem !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    
+    .stRadio > label {
+        background: #27272A !important;
+        padding: 1rem 2rem !important;
+        border-radius: 0.5rem !important;
+        text-align: center !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .stRadio > label[data-checked="true"] {
+        background: #3B82F6 !important;
+        color: white !important;
+    }
+    
+    /* Ocultar radio buttons */
+    .stRadio input {
+        display: none !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Sección de monto
+st.markdown("<p class='section-title'>¿Cuánto necesitas?</p>", unsafe_allow_html=True)
+
+# Slider sin números visibles
+monto = st.slider(
+    "",
+    min_value=detalles["monto_min"],
+    max_value=detalles["monto_max"],
+    step=50000,
+    key="monto_slider",
+    label_visibility="collapsed"
+)
+
+# Mostrar el valor seleccionado
+st.markdown(f"<div class='monto-display'>$ {format_number(monto)}</div>", unsafe_allow_html=True)
+
+# Sección de plazo sin barra gris
+st.markdown("<div style='margin-top: 2rem;'></div>", unsafe_allow_html=True)
+st.markdown("<p class='section-title'>Selecciona el plazo</p>", unsafe_allow_html=True)
 
     /* Botones de plazo */
     div[role="radiogroup"] {
